@@ -56,6 +56,8 @@ Open the URL provided in step 8 in your web browser and log in to Superset.
  - Port
  - Database name
  - Username
+
+   
 ![Configure](/images/setup.jpg) 
 
 12. **Establish Connection**
