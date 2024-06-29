@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: superset
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: superset
+  template:
+    metadata:
+      labels:
+        app: superset
+    spec:
+      containers:
+      - name: superset
+        image: apache/superset:latest
+        ports:
+        - containerPort: 8088
+        volumeMounts:
+        - name: config
+          mountPath: /app/superset_config.py
+          subPath: superset_config.py
+        command:
+        - /bin/sh
+        - -c
+        - |
+          apt-get update && apt-get install -y gcc libffi-dev libssl-dev
+          pip install clickhouse-connect
+          superset db upgrade
+          superset fab create-admin --username admin --firstname Superset --lastname Admin --email admin@superset.com --password admin
+          superset init
+          gunicorn --bind 0.0.0.0:8088 --worker-class gthread --workers 10 --threads 20 --timeout 60 --limit-request-line 0 --limit-request-field_size 0 "superset.app:create_app()"
+      volumes:
+      - name: config
+        configMap:
+          name: superset-config
